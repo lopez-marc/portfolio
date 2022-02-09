@@ -1,0 +1,99 @@
+html {
+  background-color: white;
+}
+
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+
+/* for block of numbers */
+
+main pre code.hljs {
+  padding: 1.5em 0;
+}
+
+.hljs-ln-numbers {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  text-align: center;
+  color: #ccc;
+  border-right: 10px solid transparent;
+  vertical-align: top;
+  padding-right: 5px;
+}
+
+/* for block of code */
+
+// .hljs-ln tr .hljs-ln-code {
+//   padding-left: 10px;
+// }
+.hljs .hljs-ln td {
+  padding: 2px 5px;
+}
+.hljs-ln-code {
+  font-size: 12px;
+}
+.hljs-ln {
+  width: 100%;
+}
+tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.hljs-ln-numbers {
+  color: #eee;
+  width: 3%;
+  text-align: right;
+  font-size: 12px;
+}
+// tr:nth-child(odd) .hljs-ln-numbers {
+//   color: #aaa;
+// }
+
+$lineBackground: rgba(145, 240, 134, 0.4);
+// $lineBackground: pink;
+
+$linesBC: 81, 82, 83, 85, 87;
+
+@each $i in $linesBC {
+  // .hljs-ln-line
+  #backendController .hljs-ln-code[data-line-number="#{$i}"] {
+    // div:nth-child(#{$i})::after {
+    background-color: $lineBackground;
+  }
+}
+
+//   @for $i from 1 through 36 {
+//     .hljs-ln-line[data-line-number="#{$i}"] {
+//     // div:nth-child(#{$i})::after {
+//         background-color:rgba(255,255,255,0.3);
+//     }
+//   }
+
+//   .hljs-ln-line[data-line-number="1"] {
+//     background-color:rgba(255,255,255,0.3);
+//   }
+
+main {
+  display: grid;
+  grid-template-columns: 2fr 8fr 2fr;
+  grid-template-areas:
+    ". . ."
+    ". . ."
+    ". . .";
+}
+
+main > div {
+  grid-column: 2 / 3;
+}
+pre {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}

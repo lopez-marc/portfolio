@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+    <link rel="stylesheet" href="./styles/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+    <script src="node_modules/highlightjs-line-numbers.js/src/highlightjs-line-numbers.js"></script>
+    <script>
+      // hljs.initHighlightingOnLoad();
+      hljs.initLineNumbersOnLoad();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <main>
+      <div id="backendController">
+        <pre><code class="language-javascript">import { Location } from "./location.model.js";
+import { Picture } from "../picture/picture.model.js";
+import { geocoder } from "../../middleware/geocoder.js";
+import GreatCircle from "great-circle";
+import { validationResult } from "express-validator";
+      </code></pre>
+        <pre><code class="language-javascript" data-ln-start-from="70">export const findManyLocations = async (req, res) => {
+  try {
+    console.log("req body find many", req.body);
+    // let query = Object.values(req.body.locationSearchName)
+    let query = req.body.locationSearchName;
+    // let query = "";
+    console.log("query", typeof query); // string
+
+    let locations, closestLocation;
+
+    if (query === "") {
+      locations = await Location.find({});
+      console.log(locations);
+    } else {
+      locations = await Location.find({ title: { $regex: query } });
+
+      if (locations.length !== 0) {
+        query = locations[0].location.formattedAddress;
+      }
+
+      // TODO take out of the else to use in the empty query
+      const coordinates = await geocoder.geocode(query);
+      const range = 5;
+      const queryLatitude = coordinates[0].latitude;
+      const queryLongitude = coordinates[0].longitude;
+      const minLat = queryLatitude - range;
+      const maxLat = queryLatitude + range;
+      const minLon = queryLongitude - range;
+      const maxLon = queryLongitude + range;
+
+      locations = await Location.find({
+        $and: [
+          { "location.coordinates.0": { $gte: minLon } },
+          { "location.coordinates.0": { $lte: maxLon } },
+          { "location.coordinates.1": { $gte: minLat } },
+          { "location.coordinates.1": { $lte: maxLat } },
+        ],
+      });
+
+      closestLocation = locations.reduce((prev, curr) =>
+        GreatCircle.distance(
+          curr.location.coordinates[1],
+          curr.location.coordinates[0],
+          queryLatitude,
+          queryLongitude
+        ) &lt
+        GreatCircle.distance(
+          prev.location.coordinates[1],
+          prev.location.coordinates[0],
+          queryLatitude,
+          queryLongitude
+        )
+          ? curr
+          : prev
+      );
+    }
+
+    const returnedLocations = locations.map((item) => {
+      let location = {
+        _id: item._id,
+        id: item.id,
+        img: item.img,
+        title: item.title,
+        type: "point",
+        coordinates: item.location.coordinates,
+        city: item.location.city,
+        country: item.location.country,
+        pricePerNight: item.price,
+        description: item.description,
+      };
+      return location;
+    });
+
+    const returnedClosestLocation = {
+      coordinates: closestLocation.location.coordinates,
+    };
+
+    res.send({ returnedLocations, returnedClosestLocation });
+  } catch (e) {
+    console.error(e);
+    res.status(400).end(); // TODO create error
+  }
+};
+
+
+        </code></pre>
+      </div>
+    </main>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
